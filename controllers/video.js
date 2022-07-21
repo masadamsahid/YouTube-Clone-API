@@ -102,3 +102,30 @@ export const sub = async (req,res,next) => {
     next(err);
   }
 }
+
+export const getByTag = async (req,res,next) => {
+  // Get array of tags from request query params
+  const tags = req.query.tags.split(",");
+  try {
+    const videos = await Video.find({tags:{$in: tags}}).limit(20);
+    res.status(200).json(videos);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export const search = async (req,res,next) => {
+  // Get keywords
+  const query = req.query.q;
+  try {
+    
+    // Search videos by title using regular expression
+    const videos = await Video
+    .find({title: {$regex : query, $options: "i"}})
+    .limit(40);
+
+    res.status(200).json(videos);
+  } catch (err) {
+    next(err);
+  }
+}
