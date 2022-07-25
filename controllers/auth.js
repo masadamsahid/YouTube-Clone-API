@@ -42,4 +42,35 @@ export const signin = async (req, res, next) => {
   }
 };
 
-export const google = (req, res) => {};
+export const googleAuth = async (req, res, next) => {
+  try {
+    const user = await User.findOne({email: req.body.email});
+    if (user){
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
+      res
+        .cookie("access_token", token, {
+          httpOnly: true,
+        })
+        .status(200)
+        .json(user._doc);
+    }else{
+      // Create a new user
+      const newUser = new User({
+        ...req.body,
+        fromGoogle: true,
+      });
+      const savedUser = await newUser.save();
+      
+      // Create the token for the user
+      const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET_KEY);
+      res
+        .cookie("access_token", token, {
+          httpOnly: true,
+        })
+        .status(200)
+        .json(savedUser._doc);
+    }
+  }catch (err) {
+    next(err);
+  }
+};
