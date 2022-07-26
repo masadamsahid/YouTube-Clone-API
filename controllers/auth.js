@@ -55,11 +55,14 @@ export const googleAuth = async (req, res, next) => {
         .json(user._doc);
     }else{
       // Create a new user
+      console.log('aayoo')
       const newUser = new User({
         ...req.body,
         fromGoogle: true,
       });
-      const savedUser = await newUser.save();
+      const savedUser = await newUser.save().catch((err)=>{
+        console.log(err)
+      });
       
       // Create the token for the user
       const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET_KEY);
